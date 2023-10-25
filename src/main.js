@@ -16,6 +16,7 @@ function displayMovies(container, movies) {
         movieContainer.classList.add("movie-container");
         movieContainer.addEventListener("click", () => {
             location.hash = "#movie=" + movie.id
+            navigationHistory.push(location.hash)
         });
         const movieImg = document.createElement("img");
         movieImg.classList.add("movie-img");
