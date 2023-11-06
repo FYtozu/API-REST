@@ -8,6 +8,34 @@ const api = axios.create({
     }
 });
 
+function likedMoviesList() {
+    const item = JSON.parse(localStorage.getItem("liked_movies"));
+    let movies;
+
+    if (item) {
+        movies = item;
+    } else {
+        movies = {};
+    }
+
+    return movies
+}
+
+function likeMovie(movie) {
+    const likedMovies = likedMoviesList()
+
+    console.log(likedMovies);
+
+    if (likedMovies[movie.id]) {
+        delete likedMovies[movie.id];
+    } else {
+        likedMovies[movie.id] = movie
+    }
+
+    localStorage.setItem("liked_movies", JSON.stringify(likedMovies));
+    getLikedMovies()
+}
+
 const lazyLoaderOptions = {
     root: document.querySelector("body"),
     rootMargin: "0px",
@@ -40,17 +68,28 @@ function displayMovies(
     movies.forEach(movie => {
         const movieContainer = document.createElement("div");
         movieContainer.classList.add("movie-container");
-        movieContainer.addEventListener("click", () => {
-            location.hash = "#movie=" + movie.id
-            navigationHistory.push(location.hash)
-        });
         const movieImg = document.createElement("img");
         movieImg.classList.add("movie-img");
         movieImg.setAttribute("alt", movie.title);
         movieImg.setAttribute(lazyLoad ? "data-img" : "src", "https://image.tmdb.org/t/p/w300" + movie.poster_path);
-
+        movieImg.addEventListener("click", () => {
+            location.hash = "#movie=" + movie.id
+            navigationHistory.push(location.hash)
+        });
         movieImg.addEventListener("error", () => {
             movieImg.setAttribute("src", "https://cdn-icons-png.flaticon.com/512/5220/5220262.png")
+        });
+
+        const movieBtn = document.createElement("button");
+        movieBtn.classList.add("movie-btn");
+        if (likedMoviesList()[movie.id]) {
+            movieBtn.classList.add("movie-btn--liked")
+        } else {
+            movieBtn.classList.remove("movie-btn--liked")
+        }
+        movieBtn.addEventListener("click", () => {
+            movieBtn.classList.toggle("movie-btn--liked")
+            likeMovie(movie);
         })
 
         if (lazyLoad) {
@@ -58,6 +97,7 @@ function displayMovies(
         }
 
         movieContainer.appendChild(movieImg);
+        movieContainer.appendChild(movieBtn);
         container.appendChild(movieContainer);
     })
 }
@@ -213,4 +253,12 @@ async function getRelatedMoviesById(id) {
     const relatedMovies = data.results
 
     displayMovies(relatedMoviesContainer, relatedMovies, { lazyLoad: true, clean: true })
+}
+
+function getLikedMovies() {
+    const likedMovies = likedMoviesList();
+
+    const likedMoviesArray = Object.values(likedMovies)
+
+    displayMovies(likedMoviesListArticle, likedMoviesArray, { lazyLoad: true, clean: true })
 }
