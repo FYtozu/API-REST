@@ -90,6 +90,7 @@ function displayMovies(
         movieBtn.addEventListener("click", () => {
             movieBtn.classList.toggle("movie-btn--liked")
             likeMovie(movie);
+            getTrendingMoviesPreview();
         })
 
         if (lazyLoad) {
